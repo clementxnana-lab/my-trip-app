@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的專屬行程表</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 讓介面更有 App 感的微調 */
+        body { background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+        .active-tab { color: #3b82f6; border-top: 2px solid #3b82f6; }
+    </style>
+</head>
+<body>
+    <div id="app" class="max-w-md mx-auto min-h-screen bg-gray-50 flex flex-col shadow-xl overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="bg-white px-6 pt-10 pb-4 border-b">
+            <h1 class="text-2xl font-bold text-gray-800">{{ tripName }}</h1>
+            <p class="text-sm text-gray-500">{{ tripDate }} · {{ totalDays }} 天行程</p>
+        </header>
+
+        <!-- Main Content (Scrollable) -->
+        <main class="flex-1 overflow-y-auto px-4 py-6 pb-24 space-y-6">
+            <div v-for="(item, index) in itinerary" :key="index" class="relative pl-8">
+                <!-- 時間軸線 -->
+                <div v-if="index !== itinerary.length - 1" class="absolute left-3 top-6 bottom-0 w-0.5 bg-blue-200"></div>
+                <!-- 時間軸點 -->
+                <div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-blue-500 border-4 border-white flex items-center justify-center z-10"></div>
+                
+                <!-- 行程卡片 -->
+                <div class="bg-white rounded-2xl p-4 card-shadow border border-gray-100 active:scale-95 transition-transform cursor-pointer" @click="openNavigation(item.address)">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{{ item.time }}</span>
+                        <i class="fa-solid fa-location-arrow text-blue-400"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-lg">{{ item.location }}</h3>
+                    <p class="text-sm text-gray-500 mt-1 flex items-center">
+                        <i class="fa-solid fa-map-pin mr-1"></i> {{ item.address }}
+                    </p>
+                    <div v-if="item.note" class="mt-3 text-sm bg-gray-50 p-2 rounded-lg text-gray-600 italic">
+                        "{{ item.note }}"
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation Bar (App Style) -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-md border-t flex justify-around items-center pt-3 pb-6 safe-bottom shadow-2xl">
+            <div class="flex flex-col items-center active-tab">
+                <i class="fa-solid fa-calendar-day text-xl"></i>
+                <span class="text-[10px] mt-1">行程</span>
+            </div>
+            <div class="flex flex-col items-center text-gray-400">
+                <i class="fa-solid fa-map text-xl"></i>
+                <span class="text-[10px] mt-1">地圖</span>
+            </div>
+            <div class="flex flex-col items-center text-gray-400">
+                <i class="fa-solid fa-gear text-xl"></i>
+                <span class="text-[10px] mt-1">設定</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        createApp({
+            setup() {
+                const tripName = ref("阿里山日出之旅");
+                const tripDate = ref("2026.04.03 - 04.06");
+                const totalDays = ref(4);
+
+                // 範例行程資料
+                const itinerary = ref([
+                    { time: "09:00", location: "嘉義火車站", address: "嘉義市西區中山路528號", note: "在後站出口集合，找租車公司。" },
+                    { time: "11:30", location: "奮起湖老街", address: "嘉義縣竹崎鄉中和村奮起湖", note: "必吃鐵路便當，順便買甜甜圈。" },
+                    { time: "15:00", location: "阿里山國家森林遊樂區", address: "嘉義縣阿里山鄉59號", note: "先去辦理入園跟 Check-in。" },
+                    { time: "19:00", location: "阿里山車站", address: "嘉義縣阿里山鄉阿里山國家森林遊樂區", note: "確認明天日出小火車的時間。" }
+                ]);
+
+                // 導覽功能：開啟 Google Maps
+                const openNavigation = (address) => {
+                    const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+                    window.open(url, '_blank');
+                };
+
+                return {
+                    tripName, tripDate, totalDays, itinerary, openNavigation
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
